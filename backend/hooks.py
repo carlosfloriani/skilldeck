@@ -1,11 +1,25 @@
 import json
 import os
+import re
 import stat
 from pathlib import Path
 from typing import Optional
 
 HOOKS_DIR = Path("~/.claude/hooks").expanduser()
 HOOKS_CONFIG = HOOKS_DIR / "hooks.json"
+
+
+def _validate_script_name(name: str) -> None:
+    """Validate script name to prevent path traversal attacks."""
+    basename = name.removesuffix(".sh")
+    if not re.match(r'^[a-zA-Z0-9_-]+$', basename):
+        raise ValueError(f"Invalid script name: {name}")
+    # Ensure resolved path stays within HOOKS_DIR
+    resolved = (HOOKS_DIR / name).resolve()
+    try:
+        resolved.relative_to(HOOKS_DIR.resolve())
+    except ValueError:
+        raise ValueError(f"Path traversal detected: {name}")
 
 
 def get_hooks_config() -> Optional[dict]:
@@ -32,6 +46,7 @@ def list_scripts() -> list[str]:
 def get_script(name: str) -> Optional[str]:
     if not name.endswith(".sh"):
         return None
+    _validate_script_name(name)
     script = HOOKS_DIR / name
     if not script.exists():
         return None
@@ -41,6 +56,7 @@ def get_script(name: str) -> Optional[str]:
 def save_script(name: str, content: str) -> bool:
     if not name.endswith(".sh"):
         return False
+    _validate_script_name(name)
     script = HOOKS_DIR / name
     if not script.exists():
         return False
@@ -51,6 +67,7 @@ def save_script(name: str, content: str) -> bool:
 def create_script(name: str) -> bool:
     if not name.endswith(".sh"):
         name = name + ".sh"
+    _validate_script_name(name)
     HOOKS_DIR.mkdir(parents=True, exist_ok=True)
     script = HOOKS_DIR / name
     if script.exists():
@@ -63,6 +80,7 @@ def create_script(name: str) -> bool:
 def delete_script(name: str) -> bool:
     if not name.endswith(".sh"):
         name = name + ".sh"
+    _validate_script_name(name)
     script = HOOKS_DIR / name
     if not script.exists():
         return False

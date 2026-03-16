@@ -396,36 +396,48 @@ def list_hook_scripts():
     return hooks.list_scripts()
 
 
-@app.post("/api/hooks/scripts")
-def create_hook_script(payload: CreateScriptPayload):
-    ok = hooks.create_script(payload.name)
-    if not ok:
-        raise HTTPException(status_code=400, detail="Script already exists or invalid name")
-    return {"ok": True}
-
-
 @app.get("/api/hooks/scripts/{name}/content")
 def get_hook_script(name: str):
-    content = hooks.get_script(name)
-    if content is None:
-        raise HTTPException(status_code=404, detail="Script not found")
-    return {"content": content}
+    try:
+        content = hooks.get_script(name)
+        if content is None:
+            raise HTTPException(status_code=404, detail="Script not found")
+        return {"content": content}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.put("/api/hooks/scripts/{name}/content")
 def save_hook_script(name: str, payload: ContentPayload):
-    ok = hooks.save_script(name, payload.content)
-    if not ok:
-        raise HTTPException(status_code=404, detail="Script not found")
-    return {"ok": True}
+    try:
+        ok = hooks.save_script(name, payload.content)
+        if not ok:
+            raise HTTPException(status_code=404, detail="Script not found")
+        return {"ok": True}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/hooks/scripts")
+def create_hook_script(payload: CreateScriptPayload):
+    try:
+        ok = hooks.create_script(payload.name)
+        if not ok:
+            raise HTTPException(status_code=400, detail="Script already exists or invalid name")
+        return {"ok": True}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.delete("/api/hooks/scripts/{name}")
 def delete_hook_script(name: str):
-    ok = hooks.delete_script(name)
-    if not ok:
-        raise HTTPException(status_code=404, detail="Script not found")
-    return {"ok": True}
+    try:
+        ok = hooks.delete_script(name)
+        if not ok:
+            raise HTTPException(status_code=404, detail="Script not found")
+        return {"ok": True}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 # ── CLAUDE.md ─────────────────────────────────────────────────────────────────
@@ -495,7 +507,10 @@ def run_scheduler_job(job_id: str):
 
 @app.get("/api/scheduler/jobs/{job_id}/history")
 def get_scheduler_job_history(job_id: str, limit: int = 20):
-    return scheduler.get_job_history(job_id, limit)
+    try:
+        return scheduler.get_job_history(job_id, limit)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 # ── Search ────────────────────────────────────────────────────────────────────

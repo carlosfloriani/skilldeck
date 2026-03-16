@@ -1,4 +1,5 @@
 import json
+import re
 import uuid
 import subprocess
 import time
@@ -116,7 +117,14 @@ def _append_history(job_id: str, record: dict) -> None:
         f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
+def _validate_job_id(job_id: str) -> None:
+    """Validate job_id to prevent path traversal attacks."""
+    if not re.match(r'^[a-f0-9]{1,16}$', job_id):
+        raise ValueError(f"Invalid job ID: {job_id}")
+
+
 def get_job_history(job_id: str, limit: int = 20) -> list[dict]:
+    _validate_job_id(job_id)
     history_file = HISTORY_DIR / f"{job_id}.jsonl"
     if not history_file.exists():
         return []
