@@ -227,6 +227,7 @@ def scan_skills_single(skill_id: str) -> dict:
 
 
 def delete_skill(skill_id: str) -> bool:
+    _validate_skill_id(skill_id)
     skill_dir = SKILLS_DIR / skill_id
     if not skill_dir.exists():
         return False
@@ -241,6 +242,7 @@ def delete_skill(skill_id: str) -> bool:
 
 
 def duplicate_skill(skill_id: str, new_name: str) -> dict:
+    _validate_skill_id(skill_id)
     if not re.match(r'^[a-z0-9]+(-[a-z0-9]+)*$', new_name):
         raise ValueError("Name must be kebab-case")
     if (SKILLS_DIR / new_name).exists():

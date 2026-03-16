@@ -103,6 +103,7 @@ def create_agent(name: str, description: str = "", tools: list[str] | None = Non
 
 
 def delete_agent(agent_id: str) -> bool:
+    _validate_agent_id(agent_id)
     agent_file = AGENTS_DIR / f"{agent_id}.md"
     if not agent_file.exists():
         return False
@@ -111,6 +112,7 @@ def delete_agent(agent_id: str) -> bool:
 
 
 def duplicate_agent(agent_id: str, new_name: str) -> dict:
+    _validate_agent_id(agent_id)
     if not re.match(r'^[a-z0-9]+(-[a-z0-9]+)*$', new_name):
         raise ValueError("Name must be kebab-case")
     src = AGENTS_DIR / f"{agent_id}.md"

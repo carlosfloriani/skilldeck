@@ -126,6 +126,7 @@ def create_command(name: str, description: str = "", arguments: list[dict] | Non
 
 
 def delete_command(cmd_id: str) -> bool:
+    _validate_command_id(cmd_id)
     cmd_file = COMMANDS_DIR / f"{cmd_id}.md"
     if not cmd_file.exists():
         return False

@@ -134,10 +134,13 @@ def save_skill_content(skill_id: str, payload: ContentPayload):
 
 @app.delete("/api/skills/{skill_id}")
 def delete_skill(skill_id: str):
-    ok = skills.delete_skill(skill_id)
-    if not ok:
-        raise HTTPException(status_code=404, detail="Skill not found")
-    return {"ok": True}
+    try:
+        ok = skills.delete_skill(skill_id)
+        if not ok:
+            raise HTTPException(status_code=404, detail="Skill not found")
+        return {"ok": True}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.post("/api/skills/{skill_id}/duplicate")
@@ -254,10 +257,13 @@ def save_agent_content(agent_id: str, payload: ContentPayload):
 
 @app.delete("/api/agents/{agent_id}")
 def delete_agent(agent_id: str):
-    ok = agents.delete_agent(agent_id)
-    if not ok:
-        raise HTTPException(status_code=404, detail="Agent not found")
-    return {"ok": True}
+    try:
+        ok = agents.delete_agent(agent_id)
+        if not ok:
+            raise HTTPException(status_code=404, detail="Agent not found")
+        return {"ok": True}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.post("/api/agents/{agent_id}/duplicate")
@@ -265,6 +271,8 @@ def duplicate_agent(agent_id: str, payload: DuplicatePayload):
     try:
         return agents.duplicate_agent(agent_id, payload.new_name)
     except ValueError as e:
+        if "not found" in str(e).lower():
+            raise HTTPException(status_code=404, detail=str(e))
         raise HTTPException(status_code=400, detail=str(e))
 
 
@@ -334,10 +342,13 @@ def save_command_content(cmd_id: str, payload: ContentPayload):
 
 @app.delete("/api/commands/{cmd_id}")
 def delete_command(cmd_id: str):
-    ok = commands.delete_command(cmd_id)
-    if not ok:
-        raise HTTPException(status_code=404, detail="Command not found")
-    return {"ok": True}
+    try:
+        ok = commands.delete_command(cmd_id)
+        if not ok:
+            raise HTTPException(status_code=404, detail="Command not found")
+        return {"ok": True}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 # ── Settings ──────────────────────────────────────────────────────────────────
