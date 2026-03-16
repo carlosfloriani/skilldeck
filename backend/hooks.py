@@ -1,4 +1,6 @@
 import json
+import os
+import stat
 from pathlib import Path
 from typing import Optional
 
@@ -43,4 +45,26 @@ def save_script(name: str, content: str) -> bool:
     if not script.exists():
         return False
     script.write_text(content, encoding="utf-8")
+    return True
+
+
+def create_script(name: str) -> bool:
+    if not name.endswith(".sh"):
+        name = name + ".sh"
+    HOOKS_DIR.mkdir(parents=True, exist_ok=True)
+    script = HOOKS_DIR / name
+    if script.exists():
+        return False
+    script.write_text("#!/usr/bin/env bash\n\n", encoding="utf-8")
+    script.chmod(script.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+    return True
+
+
+def delete_script(name: str) -> bool:
+    if not name.endswith(".sh"):
+        name = name + ".sh"
+    script = HOOKS_DIR / name
+    if not script.exists():
+        return False
+    script.unlink()
     return True

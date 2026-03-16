@@ -15,6 +15,7 @@ const TABS: { id: TabId; label: string }[] = [
   { id: 'settings', label: 'Settings' },
   { id: 'hooks', label: 'Hooks' },
   { id: 'claudemd', label: 'CLAUDE.md' },
+  { id: 'scheduler', label: 'Scheduler' },
 ]
 
 export default function Nav({ active, onChange, error }: Props) {

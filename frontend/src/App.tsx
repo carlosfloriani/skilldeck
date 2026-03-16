@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { TabId } from './types'
 import Nav from './components/Nav'
+import { ToastProvider } from './components/Toast'
 import SkillsView from './views/SkillsView'
 import AgentsView from './views/AgentsView'
 import TeamsView from './views/TeamsView'
@@ -9,6 +10,7 @@ import CommandsView from './views/CommandsView'
 import SettingsView from './views/SettingsView'
 import HooksView from './views/HooksView'
 import ClaudeMdView from './views/ClaudeMdView'
+import SchedulerView from './views/SchedulerView'
 
 export default function App() {
   const [tab, setTab] = useState<TabId>('skills')
@@ -18,7 +20,7 @@ export default function App() {
   useEffect(() => {
     const check = async () => {
       try {
-        const res = await fetch('/api/skills')
+        const res = await fetch('/api/health')
         setError(!res.ok)
       } catch {
         setError(true)
@@ -29,29 +31,45 @@ export default function App() {
     return () => clearInterval(id)
   }, [])
 
-  return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100vh',
-      overflow: 'hidden',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-      fontSize: 14,
-      color: '#1a1a1a',
-      background: '#f5f5f5',
-    }}>
-      <Nav active={tab} onChange={setTab} error={error} />
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey) {
+        if (e.key === 'f') {
+          // Focus search — handled by individual views
+        }
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
 
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        {tab === 'skills'    && <SkillsView />}
-        {tab === 'agents'    && <AgentsView />}
-        {tab === 'teams'     && <TeamsView />}
-        {tab === 'flow'      && <FlowchartView />}
-        {tab === 'commands'  && <CommandsView />}
-        {tab === 'settings'  && <SettingsView />}
-        {tab === 'hooks'     && <HooksView />}
-        {tab === 'claudemd'  && <ClaudeMdView />}
+  return (
+    <ToastProvider>
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        overflow: 'hidden',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        fontSize: 14,
+        color: '#1a1a1a',
+        background: '#f5f5f5',
+      }}>
+        <Nav active={tab} onChange={setTab} error={error} />
+
+        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+          {tab === 'skills'    && <SkillsView />}
+          {tab === 'agents'    && <AgentsView />}
+          {tab === 'teams'     && <TeamsView />}
+          {tab === 'flow'      && <FlowchartView />}
+          {tab === 'commands'  && <CommandsView />}
+          {tab === 'settings'  && <SettingsView />}
+          {tab === 'hooks'     && <HooksView />}
+          {tab === 'claudemd'  && <ClaudeMdView />}
+          {tab === 'scheduler' && <SchedulerView />}
+        </div>
       </div>
-    </div>
+    </ToastProvider>
   )
 }

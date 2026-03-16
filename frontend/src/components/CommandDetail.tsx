@@ -1,10 +1,14 @@
+import { useState } from 'react'
 import { CommandDef } from '../types'
 
 interface Props {
   command: CommandDef
+  onDelete: (cmdId: string) => void
 }
 
-export default function CommandDetail({ command }: Props) {
+export default function CommandDetail({ command, onDelete }: Props) {
+  const [confirmDelete, setConfirmDelete] = useState(false)
+
   return (
     <div style={{
       display: 'flex',
@@ -45,7 +49,7 @@ export default function CommandDetail({ command }: Props) {
       )}
 
       {command.arguments.length > 0 && (
-        <div>
+        <div style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 11, color: '#888', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Arguments
           </div>
@@ -92,8 +96,43 @@ export default function CommandDetail({ command }: Props) {
       )}
 
       {command.arguments.length === 0 && (
-        <div style={{ color: '#aaa', fontSize: 12 }}>No arguments</div>
+        <div style={{ color: '#aaa', fontSize: 12, marginBottom: 16 }}>No arguments</div>
       )}
+
+      {/* Delete button */}
+      <div style={{ marginTop: 'auto' }}>
+        {!confirmDelete ? (
+          <button
+            onClick={() => setConfirmDelete(true)}
+            style={{
+              padding: '4px 8px', border: '1px solid #fecaca', borderRadius: 4,
+              background: '#fff', cursor: 'pointer', fontSize: 11, color: '#ef4444',
+            }}
+          >Delete Command</button>
+        ) : (
+          <div style={{
+            padding: '8px 10px', background: '#fef2f2',
+            borderRadius: 6, border: '1px solid #fecaca',
+            display: 'flex', alignItems: 'center', gap: 8,
+          }}>
+            <span style={{ fontSize: 12, color: '#dc2626', flex: 1 }}>Delete?</span>
+            <button
+              onClick={() => { onDelete(command.id); setConfirmDelete(false) }}
+              style={{
+                padding: '4px 10px', border: 'none', borderRadius: 4,
+                background: '#dc2626', color: '#fff', cursor: 'pointer', fontSize: 11,
+              }}
+            >Yes</button>
+            <button
+              onClick={() => setConfirmDelete(false)}
+              style={{
+                padding: '4px 10px', border: '1px solid #ddd', borderRadius: 4,
+                background: '#fff', cursor: 'pointer', fontSize: 11,
+              }}
+            >Cancel</button>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

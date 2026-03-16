@@ -67,7 +67,14 @@ def scan_commands() -> list[dict]:
     return commands
 
 
+def _validate_command_id(cmd_id: str) -> None:
+    """Validate command_id to prevent path traversal attacks."""
+    if not re.match(r'^[a-z0-9]+(-[a-z0-9]+)*$', cmd_id):
+        raise ValueError(f"Invalid command ID: {cmd_id}")
+
+
 def get_command_content(cmd_id: str) -> Optional[str]:
+    _validate_command_id(cmd_id)
     cmd_file = COMMANDS_DIR / f"{cmd_id}.md"
     if not cmd_file.exists():
         return None
@@ -75,8 +82,52 @@ def get_command_content(cmd_id: str) -> Optional[str]:
 
 
 def save_command_content(cmd_id: str, content: str) -> bool:
+    _validate_command_id(cmd_id)
     cmd_file = COMMANDS_DIR / f"{cmd_id}.md"
     if not cmd_file.exists():
         return False
     cmd_file.write_text(content, encoding="utf-8")
+    return True
+
+
+def create_command(name: str, description: str = "", arguments: list[dict] | None = None) -> dict:
+    if not re.match(r'^[a-z0-9]+(-[a-z0-9]+)*$', name):
+        raise ValueError("Name must be kebab-case")
+    cmd_file = COMMANDS_DIR / f"{name}.md"
+    if cmd_file.exists():
+        raise ValueError(f"Command already exists: {name}")
+
+    COMMANDS_DIR.mkdir(parents=True, exist_ok=True)
+    arguments = arguments or []
+
+    lines = ["---", f"name: {name}", f"description: {description}"]
+    if arguments:
+        lines.append("arguments:")
+        for arg in arguments:
+            first = True
+            for k, v in arg.items():
+                prefix = "- " if first else "  "
+                lines.append(f"  {prefix}{k}: {v}")
+                first = False
+    lines.append("---")
+    lines.append("")
+    lines.append(f"# {name}")
+    lines.append("")
+
+    cmd_file.write_text("\n".join(lines), encoding="utf-8")
+
+    fm = parse_frontmatter(cmd_file.read_text(encoding="utf-8"))
+    return {
+        "id": name,
+        "name": fm.get("name") or name,
+        "description": fm.get("description", ""),
+        "arguments": fm.get("arguments", []),
+    }
+
+
+def delete_command(cmd_id: str) -> bool:
+    cmd_file = COMMANDS_DIR / f"{cmd_id}.md"
+    if not cmd_file.exists():
+        return False
+    cmd_file.unlink()
     return True

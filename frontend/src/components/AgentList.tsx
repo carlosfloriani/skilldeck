@@ -5,9 +5,10 @@ interface Props {
   agents: AgentDef[]
   selected: AgentDef | null
   onSelect: (agent: AgentDef) => void
+  onCreateClick: () => void
 }
 
-export default function AgentList({ agents, selected, onSelect }: Props) {
+export default function AgentList({ agents, selected, onSelect, onCreateClick }: Props) {
   const [query, setQuery] = useState('')
 
   const filtered = agents.filter(a =>
@@ -17,14 +18,14 @@ export default function AgentList({ agents, selected, onSelect }: Props) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-      <div style={{ padding: '10px 12px', borderBottom: '1px solid #e5e5e5' }}>
+      <div style={{ padding: '10px 12px', borderBottom: '1px solid #e5e5e5', display: 'flex', gap: 8, alignItems: 'center' }}>
         <input
           type="search"
           placeholder="Search agents…"
           value={query}
           onChange={e => setQuery(e.target.value)}
           style={{
-            width: '100%',
+            flex: 1,
             padding: '6px 10px',
             border: '1px solid #ddd',
             borderRadius: 6,
@@ -34,6 +35,16 @@ export default function AgentList({ agents, selected, onSelect }: Props) {
             boxSizing: 'border-box',
           }}
         />
+        <button
+          onClick={onCreateClick}
+          title="Create new agent"
+          style={{
+            width: 28, height: 28, border: '1px solid #ddd', borderRadius: 6,
+            background: '#fff', cursor: 'pointer', fontSize: 16, color: '#555',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >+</button>
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto' }}>

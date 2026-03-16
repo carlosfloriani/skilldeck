@@ -17,9 +17,10 @@ interface Props {
   commands: CommandDef[]
   selected: CommandDef | null
   onSelect: (cmd: CommandDef) => void
+  onCreateClick: () => void
 }
 
-export default function CommandList({ commands, selected, onSelect }: Props) {
+export default function CommandList({ commands, selected, onSelect, onCreateClick }: Props) {
   const [query, setQuery] = useState('')
 
   const filtered = commands.filter(c => {
@@ -33,14 +34,14 @@ export default function CommandList({ commands, selected, onSelect }: Props) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
-      <div style={{ padding: '10px 12px', borderBottom: '1px solid #e5e5e5' }}>
+      <div style={{ padding: '10px 12px', borderBottom: '1px solid #e5e5e5', display: 'flex', gap: 8, alignItems: 'center' }}>
         <input
           type="text"
           placeholder="Search commands…"
           value={query}
           onChange={e => setQuery(e.target.value)}
           style={{
-            width: '100%',
+            flex: 1,
             padding: '6px 10px',
             border: '1px solid #ddd',
             borderRadius: 6,
@@ -49,6 +50,16 @@ export default function CommandList({ commands, selected, onSelect }: Props) {
             boxSizing: 'border-box',
           }}
         />
+        <button
+          onClick={onCreateClick}
+          title="Create new command"
+          style={{
+            width: 28, height: 28, border: '1px solid #ddd', borderRadius: 6,
+            background: '#fff', cursor: 'pointer', fontSize: 16, color: '#555',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >+</button>
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto' }}>

@@ -14,6 +14,13 @@ export interface Skill {
   license: string;
   path: string;
   agents: Agents;
+  metadata_version: string;
+  metadata_author: string;
+  allowed_tools: string;
+  compatibility: string;
+  word_count: number;
+  has_examples: boolean;
+  mtime: string;
 }
 
 export type AgentId = keyof Agents;
@@ -50,7 +57,7 @@ export interface Team {
   color: string;
 }
 
-export type TabId = 'skills' | 'agents' | 'teams' | 'flow' | 'commands' | 'settings' | 'hooks' | 'claudemd';
+export type TabId = 'skills' | 'agents' | 'teams' | 'flow' | 'commands' | 'settings' | 'hooks' | 'claudemd' | 'scheduler';
 
 export interface CommandArg {
   name: string;
@@ -66,3 +73,43 @@ export interface CommandDef {
 }
 
 export type SettingsFileId = 'main' | 'local';
+
+export interface ValidationItem {
+  label: string;
+  ok: boolean;
+  points: number;
+  maxPoints: number;
+}
+
+export interface SkillValidation {
+  score: number;
+  items: ValidationItem[];
+}
+
+export type SkillTemplate = 'minimal' | 'standard' | 'scripts' | 'pattern';
+
+export interface SchedulerJob {
+  id: string;
+  name: string;
+  cron: string;
+  command: string;
+  enabled: boolean;
+  created_at: string;
+  last_run: string | null;
+  last_status: 'success' | 'error' | 'running' | null;
+  last_output: string | null;
+  last_duration_ms: number | null;
+}
+
+export interface JobHistoryRecord {
+  timestamp: string;
+  status: 'success' | 'error';
+  duration_ms: number;
+  output: string;
+}
+
+export interface SearchResult {
+  type: 'skill' | 'agent' | 'command';
+  id: string;
+  name: string;
+}

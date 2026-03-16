@@ -14,6 +14,8 @@ export default function SkillEditor({ skill }: Props) {
   const lastSavedRef = useRef('')
   const skillIdRef = useRef(skill.id)
 
+  const wordCount = content.split(/\s+/).filter(Boolean).length
+
   // Load content when skill changes
   useEffect(() => {
     skillIdRef.current = skill.id
@@ -69,6 +71,7 @@ export default function SkillEditor({ skill }: Props) {
           SKILL.md
           {loading && <span style={{ color: '#aaa', marginLeft: 8, fontSize: 12 }}>Loading…</span>}
           {saved && <span style={{ color: '#16a34a', marginLeft: 8, fontSize: 12 }}>Saved</span>}
+          <span style={{ color: '#aaa', marginLeft: 8, fontSize: 11 }}>{wordCount} words</span>
         </span>
 
         <button

@@ -1,4 +1,5 @@
 import re
+import shutil
 from pathlib import Path
 from typing import Optional
 
@@ -47,7 +48,14 @@ def scan_agents() -> list[dict]:
     return agents
 
 
+def _validate_agent_id(agent_id: str) -> None:
+    """Validate agent_id to prevent path traversal attacks."""
+    if not re.match(r'^[a-z0-9]+(-[a-z0-9]+)*$', agent_id):
+        raise ValueError(f"Invalid agent ID: {agent_id}")
+
+
 def get_agent_content(agent_id: str) -> Optional[str]:
+    _validate_agent_id(agent_id)
     agent_file = AGENTS_DIR / f"{agent_id}.md"
     if not agent_file.exists():
         return None
@@ -55,8 +63,73 @@ def get_agent_content(agent_id: str) -> Optional[str]:
 
 
 def save_agent_content(agent_id: str, content: str) -> bool:
+    _validate_agent_id(agent_id)
     agent_file = AGENTS_DIR / f"{agent_id}.md"
     if not agent_file.exists():
         return False
     agent_file.write_text(content, encoding="utf-8")
     return True
+
+
+def create_agent(name: str, description: str = "", tools: list[str] | None = None) -> dict:
+    if not re.match(r'^[a-z0-9]+(-[a-z0-9]+)*$', name):
+        raise ValueError("Name must be kebab-case")
+    agent_file = AGENTS_DIR / f"{name}.md"
+    if agent_file.exists():
+        raise ValueError(f"Agent already exists: {name}")
+
+    AGENTS_DIR.mkdir(parents=True, exist_ok=True)
+    tools = tools or []
+
+    lines = ["---", f"name: {name}", f"description: {description}"]
+    if tools:
+        lines.append("tools:")
+        for tool in tools:
+            lines.append(f"  - {tool}")
+    lines.append("---")
+    lines.append("")
+    lines.append(f"# {name}")
+    lines.append("")
+
+    agent_file.write_text("\n".join(lines), encoding="utf-8")
+
+    fm = parse_frontmatter(agent_file.read_text(encoding="utf-8"))
+    return {
+        "id": name,
+        "name": fm.get("name") or name,
+        "description": fm.get("description", ""),
+        "tools": fm.get("tools", []),
+    }
+
+
+def delete_agent(agent_id: str) -> bool:
+    agent_file = AGENTS_DIR / f"{agent_id}.md"
+    if not agent_file.exists():
+        return False
+    agent_file.unlink()
+    return True
+
+
+def duplicate_agent(agent_id: str, new_name: str) -> dict:
+    if not re.match(r'^[a-z0-9]+(-[a-z0-9]+)*$', new_name):
+        raise ValueError("Name must be kebab-case")
+    src = AGENTS_DIR / f"{agent_id}.md"
+    dst = AGENTS_DIR / f"{new_name}.md"
+    if not src.exists():
+        raise ValueError(f"Source agent not found: {agent_id}")
+    if dst.exists():
+        raise ValueError(f"Agent already exists: {new_name}")
+
+    shutil.copy2(src, dst)
+
+    text = dst.read_text(encoding="utf-8")
+    text = re.sub(r"^(name:\s*).+$", rf"\g<1>{new_name}", text, count=1, flags=re.MULTILINE)
+    dst.write_text(text, encoding="utf-8")
+
+    fm = parse_frontmatter(dst.read_text(encoding="utf-8"))
+    return {
+        "id": new_name,
+        "name": fm.get("name") or new_name,
+        "description": fm.get("description", ""),
+        "tools": fm.get("tools", []),
+    }
