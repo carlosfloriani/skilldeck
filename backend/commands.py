@@ -90,7 +90,7 @@ def save_command_content(cmd_id: str, content: str) -> bool:
     return True
 
 
-def create_command(name: str, description: str = "", arguments: list[dict] | None = None) -> dict:
+def create_command(name: str, description: str = "", arguments: Optional[list[dict]] = None) -> dict:
     if not re.match(r'^[a-z0-9]+(-[a-z0-9]+)*$', name):
         raise ValueError("Name must be kebab-case")
     cmd_file = COMMANDS_DIR / f"{name}.md"

@@ -6,7 +6,7 @@ from fastapi import FastAPI, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from typing import Any
+from typing import Any, Optional
 import skills
 import agents
 import teams
@@ -81,10 +81,10 @@ class CreateJobPayload(BaseModel):
 
 
 class UpdateJobPayload(BaseModel):
-    name: str | None = None
-    cron: str | None = None
-    command: str | None = None
-    enabled: bool | None = None
+    name: Optional[str] = None
+    cron: Optional[str] = None
+    command: Optional[str] = None
+    enabled: Optional[bool] = None
 
 
 # ── Skills ────────────────────────────────────────────────────────────────────

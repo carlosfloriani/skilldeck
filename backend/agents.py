@@ -71,7 +71,7 @@ def save_agent_content(agent_id: str, content: str) -> bool:
     return True
 
 
-def create_agent(name: str, description: str = "", tools: list[str] | None = None) -> dict:
+def create_agent(name: str, description: str = "", tools: Optional[list[str]] = None) -> dict:
     if not re.match(r'^[a-z0-9]+(-[a-z0-9]+)*$', name):
         raise ValueError("Name must be kebab-case")
     agent_file = AGENTS_DIR / f"{name}.md"
